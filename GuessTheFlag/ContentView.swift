@@ -12,7 +12,9 @@ struct ContentView: View {
     // MARK: - Variables
     @State private var showingScore = false
     @State private var scoreTitle = ""
+    @State var showingResetAlert = false
     @State var score = 0
+    @State var questionsCount = 0
     @State var countries = ["Estonia", "France", "Germany", "Ireland", "Italy", "Nigeria", "Poland", "Spain", "UK", "Ukraine", "US"].shuffled()
     @State var correctAnswer = Int.random(in: 0...2)
     
@@ -20,8 +22,6 @@ struct ContentView: View {
     var body: some View {
         
         ZStack {
-//            LinearGradient(colors: [.blue, .black], startPoint: .top, endPoint: .bottom)
-//                .ignoresSafeArea()
             RadialGradient(stops: [
                 .init(color: Color(red: 0.1, green: 0.2, blue: 0.45), location: 0.3),
                 .init(color: Color(red: 0.76, green: 0.15, blue: 0.26), location: 0.3)
@@ -72,14 +72,19 @@ struct ContentView: View {
                 Spacer()
             }
             .padding()
-            
+        }
+        .alert("Game Over", isPresented: $showingResetAlert) {
+            Button("Reset", action: reset)
+        } message: {
+            Text("You have answered 8 question.")
         }
     }
     
     func flagTapped(_ number: Int) {
+        questionsCount += 1
         if number == correctAnswer {
             scoreTitle = "Correct"
-            score+=1
+            score += 1
         } else {
             scoreTitle = "Wrong! The correct answer is \(countries[correctAnswer])"
         }
@@ -89,8 +94,22 @@ struct ContentView: View {
     func askQuestions() {
         countries.shuffle()
         correctAnswer = Int.random(in: 0...2)
+        checkForReset()
     }
-}
+    
+    func checkForReset() {
+        if questionsCount >= 8 {
+            showingResetAlert = true
+        }
+    }
+    func reset() {
+            score = 0
+            questionsCount = 0
+            askQuestions()
+        }
+    }
+    
+
 
 #Preview {
     ContentView()
